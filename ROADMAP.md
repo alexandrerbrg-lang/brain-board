@@ -20,7 +20,7 @@ L'app évolue au fil des recommandations du propriétaire du projet. Chaque dema
 - [x] Mobile : capture vocale prioritaire (gros bouton micro), arborescence toujours visible
 - [x] Mobile : priorisation et segmentation (Focus, top 3, matrice d'Eisenhower, filtres, glisser pour terminer / reporter)
 - [x] PWA installable
-- [ ] Publication sur GitHub (repo prêt, à pousser)
+- [x] Publication sur GitHub + GitHub Pages : https://alexandrerbrg-lang.github.io/brain-board/
 
 ## Pistes proposées (à valider)
 - [ ] **Synchronisation ordinateur ↔ téléphone** (ex. Supabase / Firebase / fichier iCloud) — aujourd'hui chaque appareil a ses données

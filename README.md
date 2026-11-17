@@ -1,5 +1,7 @@
 # 🧠 Brain Board
 
+**▶︎ App en ligne : https://alexandrerbrg-lang.github.io/brain-board/**
+
 Vide ta tête **à la voix** (ou au clavier) : l'app range tout automatiquement en **projets → sous-projets → tâches**, relie les éléments entre eux, suit tes **fournisseurs** et te dit **quoi faire en premier**.
 
 - 🕸 **Carte façon Miro** : arborescence avec branches, liens entre tâches (lien, dépendance, fournisseur), glisser-déposer, zoom.
