@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Brain Board">
+<meta name="description" content="Brain dump vocal → projets, tâches, fournisseurs et liens, organisés automatiquement.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Brain Board</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header id="top">
+  <span class="logo">🧠<span> Brain Board</span></span>
+  <nav class="seg desk" id="views">
+    <button data-view="canvas">🕸 Carte</button>
+    <button data-view="focus">🎯 Focus</button>
+    <button data-view="projects">📁 Projets</button>
+    <button data-view="suppliers">🏭 Fournisseurs</button>
+  </nav>
+  <span id="stats"></span>
+  <span class="sp"></span>
+  <button class="btn desk" id="bLayout" title="Réorganiser la carte">✨ Réorganiser</button>
+  <button class="btn pri desk" id="bAdd">🎙️ Ajouter <kbd>D</kbd></button>
+  <button class="btn icon" id="bSettings" aria-label="Réglages">⚙︎</button>
+</header>
+
+<main>
+  <section id="v-canvas" class="view">
+    <div id="vp"><div id="world"><svg id="edges"></svg><div id="nodes"></div></div></div>
+    <div id="legend"></div>
+    <div id="zoom"><button class="btn" id="zOut">−</button><button class="btn" id="zFit">Ajuster</button><button class="btn" id="zIn">+</button></div>
+    <div class="hint desk">Glisse <b>🔗</b> d'une carte vers une autre pour les lier · <b>Maj+clic</b> lie à la sélection · double-clic = note</div>
+  </section>
+  <section id="v-focus" class="view"></section>
+  <section id="v-projects" class="view"></section>
+  <section id="v-suppliers" class="view"></section>
+</main>
+
+<nav id="tabbar" class="mob">
+  <button data-view="focus">🎯<span>Focus</span></button>
+  <button data-view="projects">📁<span>Projets</span></button>
+  <button id="fab" aria-label="Dicter">🎙️</button>
+  <button data-view="canvas">🕸<span>Carte</span></button>
+  <button data-view="suppliers">🏭<span>Fourn.</span></button>
+</nav>
+
+<div id="scrim"></div>
+
+<aside id="capture" class="sheet left">
+  <div class="sh-hd">
+    <div class="seg" id="capTabs"><button data-tab="voice" class="on">🎙️ Vocal / vrac</button><button data-tab="form">⌨️ Formulaire</button></div>
+    <span class="mode" id="modeLbl"></span>
+    <button class="x" data-close aria-label="Fermer">×</button>
+  </div>
+  <div class="sh-bd">
+    <div id="tab-voice">
+      <button class="micbig" id="micBtn"><span class="mi">🎙️</span><span class="ml">Appuyer pour parler</span></button>
+      <div class="interim" id="interim"></div>
+      <textarea id="dumpText" placeholder="Parle ou écris en vrac…
+
+« Pour le projet boutique, appeler l'électricien demain, c'est urgent. Ensuite commander les étagères chez MeubleDirect avant vendredi. Lie-le au devis éclairage. »"></textarea>
+      <div class="opts">
+        <label class="ck"><input type="checkbox" id="autoProc"> Organiser dès que j'arrête de parler</label>
+        <label class="ck"><input type="checkbox" id="autoLayout" checked> Réorganiser la carte</label>
+      </div>
+      <button class="btn pri big" id="bParse">✨ Organiser</button>
+      <div id="result"></div>
+      <details class="help">
+        <summary>🗣 Ce que je comprends (phrases & commandes)</summary>
+        <p><b>Ranger</b> : « pour le projet <i>X</i> … », « côté <i>Y</i>, … » (sous-projet), <code># X</code> / <code>## Y</code> au clavier.</p>
+        <p><b>Fournisseurs</b> : « chez <i>Dupont</i> », « le fournisseur <i>Dupont</i> », <code>@Dupont</code> · statuts : « devis reçu », « commandé », « livré », « contacté », « litige ».</p>
+        <p><b>Dates</b> : demain, vendredi, semaine prochaine, dans 3 jours, 12/12, 5 mars. <b>Priorité</b> : urgent / critique, important. <b>Effort</b> : rapide.</p>
+        <p><b>🔗 Lier</b> : « lie <i>A</i> à <i>B</i> », « relie <i>A</i> avec <i>B</i> », « lie-le à <i>B</i> » (dernier élément dicté), « <i>A</i> dépend de <i>B</i> », « <i>A</i> bloque <i>B</i> », « délie <i>A</i> et <i>B</i> ».</p>
+        <p><b>⚙︎ Modifier</b> : « marque <i>A</i> comme fait », « <i>A</i> c'est fait », « mets <i>A</i> en urgent », « reporte <i>A</i> à lundi », « déplace <i>A</i> dans <i>Projet</i> », « supprime <i>A</i> ».</p>
+        <p>Avec une clé API Claude (⚙︎), l'IA comprend la parole libre bien mieux et crée aussi les liens évidents toute seule.</p>
+      </details>
+    </div>
+
+    <form id="tab-form" hidden autocomplete="off">
+      <label>Titre *<input name="title" required placeholder="Ex : Envoyer le devis signé"></label>
+      <div class="row"><label>Type<select name="type" id="fType"></select></label><label>Priorité<select name="prio" id="fPrio"></select></label></div>
+      <div class="row"><label>Projet<input name="project" id="fProject" list="dl-projects" placeholder="Inbox"></label><label>Sous-projet<input name="sub" list="dl-subs" placeholder="(optionnel)"></label></div>
+      <div class="row"><label>Échéance<input type="date" name="due"></label><label>Effort<select name="effort" id="fEffort"></select></label></div>
+      <label>Fournisseur<input name="supplier" list="dl-suppliers" placeholder="Nom — créé s'il n'existe pas"></label>
+      <div class="row"><label style="flex:2">Lier à<input name="linkTo" list="dl-nodes" placeholder="Tâche existante (optionnel)"></label>
+        <label>Type de lien<select name="linkKind"><option value="lien">🔗 Lié à</option><option value="depend">⏳ Dépend de</option></select></label></div>
+      <label>Notes<textarea name="notes" rows="3"></textarea></label>
+      <div class="row"><button type="submit" class="btn pri" value="close">Ajouter</button><button type="submit" class="btn" value="more">Ajouter + suivant</button></div>
+      <p class="mut sm">Raccourcis : <kbd>N</kbd> formulaire · <kbd>D</kbd> dictée · <kbd>1-4</kbd> vues · <kbd>⌘Z</kbd> annuler</p>
+    </form>
+  </div>
+</aside>
+
+<aside id="panel" class="sheet right">
+  <div class="sh-hd"><span id="pTitle"></span><button class="x" data-close aria-label="Fermer">×</button></div>
+  <div class="sh-bd" id="pBody"></div>
+</aside>
+
+<datalist id="dl-projects"></datalist><datalist id="dl-subs"></datalist><datalist id="dl-suppliers"></datalist><datalist id="dl-nodes"></datalist>
+<input type="file" id="fileIn" accept=".json" hidden>
+<div id="toast"></div>
+
+<dialog id="settings">
+  <h3>Réglages</h3>
+  <label>Clé API Anthropic (optionnelle — organisation par IA)<input id="sKey" type="password" placeholder="sk-ant-…" autocomplete="off"></label>
+  <div class="row"><label>Modèle<input id="sModel" placeholder="claude-sonnet-5-5"></label><label>Relance fournisseur après (jours)<input id="sRelance" type="number" min="1"></label></div>
+  <p class="mut sm">La clé reste dans ce navigateur et n'est envoyée qu'à l'API Anthropic. Sans clé, le tri se fait localement par mots-clés.</p>
+  <p class="mut sm">⚠️ Les données sont stockées sur cet appareil. Utilise Export / Import pour passer de l'ordinateur au téléphone.</p>
+  <div class="row"><button class="btn" id="sExport">⬇︎ Export</button><button class="btn" id="sImport">⬆︎ Import</button><button class="btn danger" id="sReset">Vider</button></div>
+  <div class="row" style="margin-top:12px"><button class="btn" id="sClose">Fermer</button><button class="btn pri" id="sSave">Enregistrer</button></div>
+</dialog>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
