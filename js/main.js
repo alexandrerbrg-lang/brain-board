@@ -10,6 +10,7 @@ import { initPanel, openEditor, closeEditor, currentId, nodeLabel, resolveLabel 
 import { initViews, renderFocus, renderProjects, renderSuppliers } from './views.js';
 import { createVoice } from './voice.js';
 import { auto } from './rules.js';
+import { initSync, renderSyncBox } from './sync.js';
 
 // ───────── Vues ─────────
 let view = localStorage.getItem('bb-viewname') || (isMobile() ? 'focus' : 'canvas');
@@ -175,6 +176,7 @@ $('#bSettings').onclick = () => {
   $('#sKey').value = localStorage.getItem('bb-key') || '';
   $('#sModel').value = localStorage.getItem('bb-model') || '';
   $('#sRelance').value = CFG.relanceDays;
+  renderSyncBox();
   $('#settings').showModal();
 };
 $('#sSave').onclick = () => {
@@ -193,11 +195,11 @@ $('#sExport').onclick = () => {
 $('#sImport').onclick = () => $('#fileIn').click();
 $('#fileIn').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
-  try { const d = JSON.parse(await f.text()); if (!Array.isArray(d.nodes)) throw 0; snapshot(); replace(d); renderCanvas(); commit(); fit(); toast('Import réussi'); $('#settings').close(); }
+  try { const d = JSON.parse(await f.text()); if (!Array.isArray(d.nodes)) throw 0; snapshot(); replace(d, true); renderCanvas(); commit(); fit(); toast('Import réussi'); $('#settings').close(); }
   catch (_) { toast('Fichier invalide'); }
   e.target.value = '';
 };
-$('#sReset').onclick = () => { if (confirm('Vider complètement le tableau ? (pense à exporter avant)')) { snapshot(); replace({ nodes: [], edges: [] }); commit(); $('#settings').close(); toast('Tableau vidé', { label: 'Annuler', fn: doUndo }); } };
+$('#sReset').onclick = () => { if (confirm('Vider complètement le tableau ? (pense à exporter avant)')) { snapshot(); replace({ nodes: [], edges: [] }, true); commit(); $('#settings').close(); toast('Tableau vidé', { label: 'Annuler', fn: doUndo }); } };
 function updMode() { const ai = hasAI(); const m = $('#modeLbl'); m.textContent = ai ? 'IA Claude' : 'Local'; m.className = 'mode' + (ai ? ' ai' : ''); }
 
 // ───────── Boutons globaux & raccourcis ─────────
@@ -261,6 +263,7 @@ updMode();
 renderAll();
 setView(view);
 if (new URLSearchParams(location.search).has('dicter')) openCapture('voice');
+initSync();
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(() => {});

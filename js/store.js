@@ -3,22 +3,58 @@ import { PALETTE } from './config.js';
 import { uid, iso, TODAY, norm, cap, words } from './utils.js';
 
 const KEY = 'bb-state';
-export const S = { version: 2, nodes: [], edges: [] };
+// tomb : suppressions horodatées (id de nœud, ou "e:" + id de lien) — nécessaire pour la synchro
+export const S = { version: 2, nodes: [], edges: [], tomb: {} };
 
 const listeners = new Set();
-export const onChange = fn => listeners.add(fn);
-export function save() { localStorage.setItem(KEY, JSON.stringify(S)); }
-export function commit() { save(); listeners.forEach(f => f()); }
+export const onChange = fn => listeners.add(fn); // fn(source) : 'local' | 'remote'
+
+// ── Horodatage des modifications (mt) pour la fusion entre appareils ──
+const transient = (k, v) => (k === '_w' || k === '_h' ? undefined : v);
+const sigOf = x => JSON.stringify(x, (k, v) => (k === 'mt' ? undefined : transient(k, v)));
+export const serialize = () => JSON.stringify(S, transient);
+let prev = new Map();
+export function resetPrev() {
+  prev = new Map();
+  for (const n of S.nodes) prev.set(n.id, sigOf(n));
+  for (const e of S.edges) prev.set('e:' + e.id, sigOf(e));
+}
+function stamp() {
+  const now = Date.now(), cur = new Map();
+  for (const n of S.nodes) { const s = sigOf(n); cur.set(n.id, s); if (prev.get(n.id) !== s) n.mt = now; }
+  for (const e of S.edges) { const k = 'e:' + e.id, s = sigOf(e); cur.set(k, s); if (prev.get(k) !== s) e.mt = now; }
+  for (const k of prev.keys()) if (!cur.has(k)) S.tomb[k] = now;
+  prev = cur;
+}
+export function save() { stamp(); localStorage.setItem(KEY, serialize()); }
+export function commit() { save(); listeners.forEach(f => f('local')); }
 
 export function load() {
   const raw = JSON.parse(localStorage.getItem(KEY) || 'null');
   if (!raw) return false;
   replace(raw); return true;
 }
-export function replace(data) {
+// keepPrev = true : les différences seront horodatées comme des modifications locales (annuler, import, vider)
+export function replace(data, keepPrev = false) {
   S.nodes = data.nodes || [];
   S.edges = data.edges || [];
+  S.tomb = data.tomb || (keepPrev ? S.tomb : {}) || {};
   migrate();
+  if (!keepPrev) resetPrev();
+}
+// Applique un état venu de la synchro en conservant les objets existants (le panneau ouvert reste valide)
+export function applyRemote(data) {
+  const old = new Map(S.nodes.map(n => [n.id, n]));
+  S.nodes = (data.nodes || []).map(n => {
+    const o = old.get(n.id); if (!o) return n;
+    for (const k of Object.keys(o)) if (!(k in n) && k[0] !== '_') delete o[k];
+    return Object.assign(o, n);
+  });
+  S.edges = data.edges || [];
+  S.tomb = data.tomb || {};
+  resetPrev();
+  localStorage.setItem(KEY, serialize());
+  listeners.forEach(f => f('remote'));
 }
 function migrate() {
   // v1 → v2 : node.links[] devient S.edges[]
@@ -44,7 +80,7 @@ export function snapshot() {
 }
 export function undo() {
   const s = undoStack.pop(); if (!s) return false;
-  replace(JSON.parse(s)); commit(); return true;
+  replace(JSON.parse(s), true); commit(); return true;
 }
 
 // ── Requêtes ──

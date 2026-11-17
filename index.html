@@ -27,6 +27,7 @@
   <span class="sp"></span>
   <button class="btn desk" id="bLayout" title="Réorganiser la carte">✨ Réorganiser</button>
   <button class="btn pri desk" id="bAdd">🎙️ Ajouter <kbd>D</kbd></button>
+  <button class="btn icon" id="syncBtn" hidden aria-label="Synchronisation">☁️</button>
   <button class="btn icon" id="bSettings" aria-label="Réglages">⚙︎</button>
 </header>
 
@@ -111,7 +112,9 @@
   <label>Clé API Anthropic (optionnelle — organisation par IA)<input id="sKey" type="password" placeholder="sk-ant-…" autocomplete="off"></label>
   <div class="row"><label>Modèle<input id="sModel" placeholder="claude-sonnet-5-5"></label><label>Relance fournisseur après (jours)<input id="sRelance" type="number" min="1"></label></div>
   <p class="mut sm">La clé reste dans ce navigateur et n'est envoyée qu'à l'API Anthropic. Sans clé, le tri se fait localement par mots-clés.</p>
-  <p class="mut sm">⚠️ Les données sont stockées sur cet appareil. Utilise Export / Import pour passer de l'ordinateur au téléphone.</p>
+  <h4 class="set-h">☁️ Synchronisation ordinateur ↔ téléphone</h4>
+  <div id="syncBox"></div>
+  <h4 class="set-h">💾 Sauvegarde</h4>
   <div class="row"><button class="btn" id="sExport">⬇︎ Export</button><button class="btn" id="sImport">⬆︎ Import</button><button class="btn danger" id="sReset">Vider</button></div>
   <div class="row" style="margin-top:12px"><button class="btn" id="sClose">Fermer</button><button class="btn pri" id="sSave">Enregistrer</button></div>
 </dialog>

@@ -22,8 +22,11 @@ L'app évolue au fil des recommandations du propriétaire du projet. Chaque dema
 - [x] PWA installable
 - [x] Publication sur GitHub + GitHub Pages : https://alexandrerbrg-lang.github.io/brain-board/
 
+### v3 — 17/11/2026
+- [x] Synchronisation ordinateur ↔ téléphone (gist privé GitHub, fusion par élément, suppressions propagées, hors-ligne OK)
+
 ## Pistes proposées (à valider)
-- [ ] **Synchronisation ordinateur ↔ téléphone** (ex. Supabase / Firebase / fichier iCloud) — aujourd'hui chaque appareil a ses données
+- [ ] Synchro temps réel (aujourd'hui : à chaque modif, au retour sur l'app et toutes les 45 s)
 - [ ] Rappels / notifications (échéance, relance fournisseur)
 - [ ] Import de mémos vocaux enregistrés (fichier audio → transcription)
 - [ ] Vue calendrier / timeline

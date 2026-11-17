@@ -27,7 +27,14 @@ Puis ouvrir http://localhost:3457 (la dictée vocale nécessite `localhost` ou H
 2. *Settings → Pages → Deploy from a branch → `main` / root*.
 3. Ouvrir l'URL `https://<utilisateur>.github.io/<repo>/` sur le téléphone → *Partager → Sur l'écran d'accueil*.
 
-> Les données sont stockées **dans le navigateur de chaque appareil** (localStorage). Pour passer de l'ordinateur au téléphone : ⚙︎ → Export / Import. La synchronisation est sur la [feuille de route](ROADMAP.md).
+## Synchroniser ordinateur ↔ téléphone
+
+Les données sont stockées dans chaque appareil (ça marche hors-ligne) et fusionnées via un **gist privé** sur ton compte GitHub :
+
+1. ⚙︎ → *Synchronisation* → **Créer un jeton GitHub** (permission `gist` uniquement) → coller → **Connecter**.
+2. Sur le téléphone : ⚙︎ → coller le même jeton, **ou** depuis l'ordinateur « 📲 Lien pour mon téléphone » (AirDrop / message à soi-même) et l'ouvrir sur le téléphone.
+
+La synchro se fait à chaque modification, au retour sur l'app et toutes les 45 s. En cas de modifications sur les deux appareils, chaque élément garde sa version la plus récente ; les suppressions sont propagées. Le point ☁️ en haut indique l'état (vert = à jour).
 
 ## Dictée : compatibilité
 
@@ -62,7 +69,8 @@ js/rules.js           ⭐ automatisations visuelles + priorisation (score, Eisen
 js/parser.js          ⭐ compréhension du texte / de la voix + commandes
 js/commands.js        exécution des éléments et commandes
 js/ai.js              organisation par Claude (optionnelle)
-js/store.js           données, liens, annuler
+js/store.js           données, liens, annuler, horodatage des modifs
+js/sync.js            synchro via gist GitHub + fusion
 js/canvas.js          carte Miro
 js/views.js           Focus, Matrice, Projets, Fournisseurs
 js/panel.js           panneau d'édition
